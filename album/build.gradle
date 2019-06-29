@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8: $kotlin_version"
+    implementation "${rootProject.ext.libraryName["glide"]}:${rootProject.ext.libraryVersion["glide"]}"
+    implementation "androidx.recyclerview:recyclerview:${rootProject.ext.libraryVersion["recyclerview"]}"
+    implementation "androidx.appcompat:appcompat:${rootProject.ext.libraryVersion["appcompat"]}"
+    implementation "${rootProject.ext.libraryName["photoview"]}:${rootProject.ext.libraryVersion["photoview"]}"
+    implementation "${rootProject.ext.libraryName["constraintlayout"]}:${rootProject.ext.libraryVersion["constraintlayout"]}"
+
+    implementation('com.sonnyjack.permission:PermissionUtils:0.1.0') {
+        exclude(group: 'com.android.support', module: 'appcompat-v7')
+    }
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+}
