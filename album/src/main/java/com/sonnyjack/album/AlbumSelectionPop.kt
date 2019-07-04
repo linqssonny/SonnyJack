@@ -37,19 +37,27 @@ class AlbumSelectionPop : PopupWindow {
         var layoutManager = LinearLayoutManager(mContext, RecyclerView.VERTICAL, false)
         mRecyclerView!!.layoutManager = layoutManager
 
+        //contentView.setOnClickListener { dismiss() }
+
+        animationStyle = R.style.popAnimStyle
+
         isFocusable = true
         isOutsideTouchable = true
+        setBackgroundDrawable(null)
         width = ViewGroup.LayoutParams.MATCH_PARENT
-        height = ViewGroup.LayoutParams.WRAP_CONTENT
+        //height = AlbumImageUtils.getScreenHeight(mContext) - mContext.getDimenSize(R.dimen.album_bottom_menu_height)
+
     }
 
     fun setData(data: ArrayList<ImageFolder>, selectionImageFolder: ImageFolder?) {
-        var maxSize = 6
-        height = if (data.size > maxSize) {
-            AlbumImageUtils.dip2px(mContext, maxSize * 50f + 25f)
-        } else {
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        }
+        var maxSize = 4
+        var itemHeight = mContext.getDimenSize(R.dimen.album_pop_image_size)
+        +mContext.getDimenSize(R.dimen.album_pop_image_top)
+        +mContext.getDimenSize(R.dimen.album_pop_image_bottom) + 55f.dp(mContext)
+        var totalHeight = Math.min(data.size, maxSize) * itemHeight
+        //mRecyclerView.layoutParams.height = totalHeight
+        height = totalHeight
+
         mAdapter = object : RecyclerView.Adapter<ViewHolder>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
                 var view = LayoutInflater.from(parent.context).inflate(R.layout.album_recycler_item_pop, parent, false)

@@ -4,16 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sonnyjack.album.AlbumImageUtils
-import com.sonnyjack.album.AlbumSelectionPop
-import com.sonnyjack.album.ImageTypeUtils
-import com.sonnyjack.album.R
+import com.sonnyjack.album.*
 import com.sonnyjack.album.bean.AlbumType
 import com.sonnyjack.album.bean.ImageFolder
 import com.sonnyjack.album.bean.ImageItem
@@ -40,6 +38,7 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var mTvTitle: TextView//标题
     private lateinit var mRvContent: RecyclerView
+    private lateinit var mVBg: View
     private lateinit var mTvComplete: TextView//完成
     private lateinit var mTvFolder: TextView//图片文件夹
     private lateinit var mTvPreview: TextView//预览
@@ -66,6 +65,7 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
     private fun initView() {
         mTvTitle = findViewById(R.id.album_tv_toolbar_title)//标题
         mRvContent = findViewById(R.id.album_rv_selection_content)
+        mVBg = findViewById(R.id.album_v_bg)
         mTvComplete = findViewById(R.id.album_tv_toolbar_complete)//确定按钮
         mTvPreview = findViewById(R.id.album_tv_selection_preview)//预览按钮
         mTvFolder = findViewById(R.id.album_tv_selection_folder)//图片文件夹
@@ -74,6 +74,8 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         mMaxVideoLength = intent.getIntExtra(MAX_VIDEO_LENGTH, DEFAULT_VIDEO_LENGTH)
         mIsNeedCrop = intent.getBooleanExtra(NEED_CROP, false)
         mAlbumType = intent.getIntExtra(ALBUM_TYPE, AlbumType.IMAGE_AND_VIDEO)
+
+        showBg(false)
     }
 
     private fun initLogic() {
@@ -153,15 +155,21 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
     //显示选择图片文件夹的Pop
     private fun showPop() {
         var albumSelectionPop = AlbumSelectionPop(this)
-        albumSelectionPop.setData(getAllImageFolder(), null)
+        albumSelectionPop.setData(getAllImageFolder(), mAlbumSelectionAdapter?.getCurrentImageFolder())
         albumSelectionPop.setAlbumSelectionPopCallBack(object : AlbumSelectionPop.AlbumSelectionPopCallBack {
             override fun call(imageFolder: ImageFolder?, position: Int, obj: Any?) {
                 albumSelectionPop.dismiss()
                 changeImageFolder(position)
             }
         })
-        var parent = findViewById<View>(R.id.album_cl_bottom)
-        albumSelectionPop.showAsDropDown(parent, 0, albumSelectionPop.height)
+        albumSelectionPop.setOnDismissListener { showBg(false) }
+        var disY = resources.getDimensionPixelSize(R.dimen.album_bottom_menu_height)
+        albumSelectionPop.showAtLocation(mRvContent, Gravity.BOTTOM, 0, disY)
+        showBg(true)
+    }
+
+    private fun showBg(show: Boolean = false) {
+        mVBg.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     //加载图片失败

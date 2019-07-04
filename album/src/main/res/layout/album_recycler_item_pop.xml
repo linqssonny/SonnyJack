@@ -14,9 +14,9 @@
 			app:layout_constraintStart_toStartOf="parent"
 			android:src="@drawable/album_take_photo"
 			android:scaleType="centerCrop"
-			android:layout_marginTop="18dp"
-			android:layout_width="80dp"
-			android:layout_height="80dp"/>
+			android:layout_marginTop="@dimen/album_pop_image_top"
+			android:layout_width="@dimen/album_pop_image_size"
+			android:layout_height="@dimen/album_pop_image_size"/>
 
 	<LinearLayout
 			android:layout_width="wrap_content"
@@ -62,7 +62,7 @@
 			app:layout_constraintTop_toBottomOf="@+id/album_iv_pop_image"
 			android:id="@+id/album_v_pop_line"
 			android:layout_width="match_parent"
-			android:layout_marginTop="18dp"
+			android:layout_marginTop="@dimen/album_pop_image_bottom"
 			android:layout_height="0.5dp"
 			android:background="#e6e6e6"/>
 
