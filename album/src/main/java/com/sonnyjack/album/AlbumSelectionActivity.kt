@@ -30,6 +30,7 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         const val NEED_CROP = "need_crop"//是否需要裁剪
         const val ALBUM_TYPE = "album_type"//打开相册的类型
         const val REQUEST_CODE = 1100
+        const val TAKE_PICTURE = 1101//拍照
         const val DATA = "data"//返回的图片
         const val DATA_TYPE = "data_type"//返回的类型
     }
@@ -43,7 +44,7 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var mTvFolder: TextView//图片文件夹
     private lateinit var mTvPreview: TextView//预览
 
-    private var mIsNeedCrop = true//拍照后时候需要裁剪
+    private var mIsNeedCrop = true//是否需要裁剪
     private var mMaxNum = 9//最多选中的图片数
     private var mAlbumType = AlbumType.IMAGE
     private var mMaxVideoLength = DEFAULT_VIDEO_LENGTH//视频最长的长度
@@ -70,7 +71,7 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         mTvPreview = findViewById(R.id.album_tv_selection_preview)//预览按钮
         mTvFolder = findViewById(R.id.album_tv_selection_folder)//图片文件夹
 
-        mMaxNum = intent.getIntExtra(MAX_NUM, 9)
+        mMaxNum = intent.getIntExtra(MAX_NUM, 1)
         mMaxVideoLength = intent.getIntExtra(MAX_VIDEO_LENGTH, DEFAULT_VIDEO_LENGTH)
         mIsNeedCrop = intent.getBooleanExtra(NEED_CROP, false)
         mAlbumType = intent.getIntExtra(ALBUM_TYPE, AlbumType.IMAGE_AND_VIDEO)
@@ -114,7 +115,7 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         mAlbumSelectionAdapter!!.setAlbumSelectionCallBack(object : AlbumSelectionAdapter.AlbumSelectionCallBack {
             override fun onClick(view: View, imageItem: ImageItem, obj: Any?) {
                 if (imageItem.type == AlbumType.TAKE_PHOTO) {//拍照
-                    //AlbumUtils.openCamera(this@AlbumSelectionActivity, mIsNeedCrop)
+                    AlbumImageUtils.openCamera(this@AlbumSelectionActivity)
                 }
             }
 
@@ -294,10 +295,14 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     //拍照完成后，处理
-    private fun takePhotoComplete(imagePath: String) {
-        var resultArray = ArrayList<String>()
-        resultArray.add(imagePath)
-        // imageComplete(resultArray)
+    private fun takePhotoComplete(imagePath: String?) {
+        var resultArray = ArrayList<ImageItem>()
+        imagePath?.run {
+            var imageItem = ImageItem()
+            imageItem.path = imagePath
+            resultArray.add(imageItem)
+        }
+        imageComplete(resultArray)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -306,6 +311,9 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
             when (requestCode) {
                 ImagePreviewActivity.REQUEST_CODE -> {//预览返回
                     imageComplete(data?.getParcelableArrayListExtra<ImageItem>(DATA))
+                }
+                TAKE_PICTURE -> {//拍照
+                    takePhotoComplete(AlbumImageUtils.imageUri2Path(this, data?.data))
                 }
             }
         }

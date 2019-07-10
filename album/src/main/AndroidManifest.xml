@@ -4,13 +4,26 @@
 
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.CAMERA"/>
 
 	<application>
-		<activity android:name=".preview.ImagePreviewActivity">
-		</activity>
+		<!--图片预览-->
+		<activity
+				android:name=".preview.ImagePreviewActivity"
+				android:screenOrientation="portrait"/>
+		<!--相册选择-->
 		<activity
 				android:name="com.libalum.album.AlbumSelectionActivity"
 				android:screenOrientation="portrait"/>
+		<provider
+				android:authorities="com.sonnyjack.album.provider"
+				android:name="androidx.core.content.FileProvider"
+				android:exported="false"
+				android:grantUriPermissions="true">
+			<meta-data
+					android:name="android.support.FILE_PROVIDER_PATHS"
+					android:resource="@xml/file_path"/>
+		</provider>
 	</application>
 
 </manifest>
