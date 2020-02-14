@@ -21,6 +21,10 @@ class ImageItem() : Parcelable {
 
     var isEnable: Boolean = true//是否可以点击(用以只能选择图片或者视频)
 
+    constructor(path: String?): this(){
+        this.path = path
+    }
+
     constructor(parcel: Parcel) : this() {
         path = parcel.readString()
         type = parcel.readInt()

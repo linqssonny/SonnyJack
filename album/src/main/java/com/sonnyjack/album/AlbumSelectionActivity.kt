@@ -3,6 +3,7 @@ package com.libalum.album
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -11,12 +12,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sonnyjack.album.*
+import com.sonnyjack.album.AlbumImageUtils
+import com.sonnyjack.album.AlbumSelectionPop
+import com.sonnyjack.album.ImageTypeUtils
+import com.sonnyjack.album.R
 import com.sonnyjack.album.bean.AlbumType
 import com.sonnyjack.album.bean.ImageFolder
 import com.sonnyjack.album.bean.ImageItem
 import com.sonnyjack.album.preview.ImagePreviewActivity
-import java.util.*
+import java.io.File
 
 /**
  * 相册选择
@@ -33,6 +37,8 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         const val TAKE_PICTURE = 1101//拍照
         const val DATA = "data"//返回的图片
         const val DATA_TYPE = "data_type"//返回的类型
+
+        const val REQUEST_CROP = 1111//裁剪
     }
 
     private val mColumn = 4//每行4列
@@ -53,6 +59,8 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
     private var mLoadImageRunnable: LoadImageRunnable? = null//加载图片的线程
 
     private var mAlbumSelectionAdapter: AlbumSelectionAdapter? = null
+
+    private var mImageUrl: String? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,7 +102,12 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         //RecyclerView中item的间距
         val space = getImageSpace()
         mRvContent.addItemDecoration(object : RecyclerView.ItemDecoration() {
-            override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+            override fun getItemOffsets(
+                outRect: Rect,
+                view: View,
+                parent: RecyclerView,
+                state: RecyclerView.State
+            ) {
                 super.getItemOffsets(outRect, view, parent, state)
                 var position = parent.getChildAdapterPosition(view)
                 var spanCount = position % mColumn
@@ -112,10 +125,12 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
 
         //adapter
         mAlbumSelectionAdapter = AlbumSelectionAdapter(countImageSize())
-        mAlbumSelectionAdapter!!.setAlbumSelectionCallBack(object : AlbumSelectionAdapter.AlbumSelectionCallBack {
+        mAlbumSelectionAdapter!!.setAlbumSelectionCallBack(object :
+            AlbumSelectionAdapter.AlbumSelectionCallBack {
             override fun onClick(view: View, imageItem: ImageItem, obj: Any?) {
                 if (imageItem.type == AlbumType.TAKE_PHOTO) {//拍照
-                    AlbumImageUtils.openCamera(this@AlbumSelectionActivity)
+                    mImageUrl = AlbumImageUtils.buildImageOutputPathUrl(this@AlbumSelectionActivity)
+                    AlbumImageUtils.openCamera(this@AlbumSelectionActivity, mImageUrl)
                 }
             }
 
@@ -129,17 +144,20 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun initData() {
         setTitleText()
-        mLoadImageRunnable = LoadImageRunnable(this, mAlbumType, object : LoadImageRunnable.LoadImageRunnableCallBack {
-            override fun complete(imageFolders: ArrayList<ImageFolder>) {
-                if (null == imageFolders || imageFolders.isEmpty()) return
-                loadImageComplete(imageFolders)
-            }
+        mLoadImageRunnable = LoadImageRunnable(
+            this,
+            mAlbumType,
+            object : LoadImageRunnable.LoadImageRunnableCallBack {
+                override fun complete(imageFolders: ArrayList<ImageFolder>) {
+                    if (null == imageFolders || imageFolders.isEmpty()) return
+                    loadImageComplete(imageFolders)
+                }
 
-            override fun onError() {
-                loadImageError()
-            }
+                override fun onError() {
+                    loadImageError()
+                }
 
-        })
+            })
         Thread(mLoadImageRunnable).start()
     }
 
@@ -156,8 +174,12 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
     //显示选择图片文件夹的Pop
     private fun showPop() {
         var albumSelectionPop = AlbumSelectionPop(this)
-        albumSelectionPop.setData(getAllImageFolder(), mAlbumSelectionAdapter?.getCurrentImageFolder())
-        albumSelectionPop.setAlbumSelectionPopCallBack(object : AlbumSelectionPop.AlbumSelectionPopCallBack {
+        albumSelectionPop.setData(
+            getAllImageFolder(),
+            mAlbumSelectionAdapter?.getCurrentImageFolder()
+        )
+        albumSelectionPop.setAlbumSelectionPopCallBack(object :
+            AlbumSelectionPop.AlbumSelectionPopCallBack {
             override fun call(imageFolder: ImageFolder?, position: Int, obj: Any?) {
                 albumSelectionPop.dismiss()
                 changeImageFolder(position)
@@ -251,6 +273,12 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    private fun cropImage(imagePath: String?) {
+        var imageUri = Uri.fromFile(File(imagePath))
+        mImageUrl = AlbumImageUtils.buildImageOutputPathUrl(this@AlbumSelectionActivity)
+        AlbumImageUtils.openCropImage(this, imageUri, Uri.parse(mImageUrl), REQUEST_CROP)
+    }
+
     //确认返回
     private fun complete() {
         if (null == mAlbumSelectionAdapter) {
@@ -271,8 +299,8 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         var firstImagePath = selectItems[0].path
         var firstImageType = ImageTypeUtils.getImageType(firstImagePath)//第一张图片类型
         if (mIsNeedCrop && !"GIF".equals(firstImageType, ignoreCase = true)) {
-            //NewCropActivity.openCropActivity(this, Uri.parse(firstImagePath), REQUEST_CROP_CODE)
-            //return
+            cropImage(firstImagePath)
+            return
         }
         //选择图片完成
         imageComplete(selectItems)
@@ -302,7 +330,11 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
             imageItem.path = imagePath
             resultArray.add(imageItem)
         }
-        imageComplete(resultArray)
+        if (mIsNeedCrop) {
+            cropImage(imagePath)
+        } else {
+            imageComplete(resultArray)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -310,10 +342,15 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 ImagePreviewActivity.REQUEST_CODE -> {//预览返回
-                    imageComplete(data?.getParcelableArrayListExtra<ImageItem>(DATA))
+                    imageComplete(data?.getParcelableArrayListExtra(DATA))
                 }
                 TAKE_PICTURE -> {//拍照
-                    takePhotoComplete(AlbumImageUtils.imageUri2Path(this, data?.data))
+                    takePhotoComplete(mImageUrl)
+                }
+                REQUEST_CROP -> {//裁剪
+                    var imageList = ArrayList<ImageItem>()
+                    imageList.add(ImageItem(mImageUrl))
+                    imageComplete(imageList)
                 }
             }
         }

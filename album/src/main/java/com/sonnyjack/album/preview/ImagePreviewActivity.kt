@@ -18,7 +18,7 @@ import java.util.*
 class ImagePreviewActivity : AppCompatActivity(), View.OnClickListener, ViewPager.OnPageChangeListener {
 
     companion object {
-        const val REQUEST_CODE = 1110
+        const val REQUEST_CODE = 1110//照片返回
     }
 
     private lateinit var mTvTitle: TextView//标题

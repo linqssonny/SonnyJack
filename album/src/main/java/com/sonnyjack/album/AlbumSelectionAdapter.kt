@@ -142,12 +142,14 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
         var videoDuration = holder.getView<TextView>(R.id.album_tv_selection_duration)
 
         imageView.alpha = if (!needAlpha(imageItem)) 1.0f else 0.5f
+        imageView.scaleType = ImageView.ScaleType.CENTER_CROP
         checkImage.visibility = View.VISIBLE
         videoIcon.visibility = View.GONE
         videoDuration.visibility = View.GONE
 
         if (imageItem.type == AlbumType.TAKE_PHOTO) {
             //拍照
+            imageView.scaleType = ImageView.ScaleType.CENTER
             imageView.setImageResource(R.drawable.album_take_photo)
             checkImage.visibility = View.GONE
             imageView.setOnClickListener { mAlbumSelectionCallBack?.onClick(imageView, imageItem, null) }

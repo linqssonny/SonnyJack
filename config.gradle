@@ -15,6 +15,7 @@ ext {
             converter_gson  : 'com.squareup.retrofit2:converter-gson',
             adapter_rxjava2 : 'com.squareup.retrofit2:adapter-rxjava2',
             immersionbar    : 'com.gyf.immersionbar:immersionbar',
+            ucrop           : 'com.github.yalantis:ucrop',//https://github.com/Yalantis/uCrop
     ]
 
     libraryVersion = [
@@ -31,6 +32,7 @@ ext {
             photoview       : '2.0.0',
             statusbarutil   : '1.5.1',
             immersionbar    : '3.0.0-beta04',
+            ucrop           : '2.2.4',
     ]
 
     library = [

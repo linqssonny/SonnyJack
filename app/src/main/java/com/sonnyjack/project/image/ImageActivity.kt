@@ -36,7 +36,7 @@ class ImageActivity : BaseActivity<ImagePresenter>(), ImageContract.BaseImageVie
         }
 
         findViewById<View>(R.id.tvAlbum).setOnClickListener {
-            AlbumImageUtils.openAlbum(this, AlbumType.IMAGE, false, 5)
+            AlbumImageUtils.openAlbum(this, AlbumType.IMAGE, true, 5)
         }
     }
 

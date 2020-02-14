@@ -32,9 +32,9 @@ dependencies {
     implementation "${rootProject.ext.libraryName["photoview"]}:${rootProject.ext.libraryVersion["photoview"]}"
     implementation "${rootProject.ext.libraryName["constraintlayout"]}:${rootProject.ext.libraryVersion["constraintlayout"]}"
 
+    implementation "${rootProject.ext.libraryName["ucrop"]}:${rootProject.ext.libraryVersion["ucrop"]}"
+
     implementation('com.sonnyjack.permission:PermissionUtils:0.1.0') {
         exclude(group: 'com.android.support', module: 'appcompat-v7')
     }
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 }

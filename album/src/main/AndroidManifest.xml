@@ -1,28 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-		  package="com.sonnyjack.album">
+		package="com.sonnyjack.album">
 
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-	<uses-permission android:name="android.permission.CAMERA"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.CAMERA" />
 
 	<application>
 		<!--图片预览-->
 		<activity
 				android:name=".preview.ImagePreviewActivity"
-				android:screenOrientation="portrait"/>
+				android:screenOrientation="portrait" />
 		<!--相册选择-->
 		<activity
 				android:name="com.libalum.album.AlbumSelectionActivity"
-				android:screenOrientation="portrait"/>
+				android:screenOrientation="portrait" />
+
+		<!--图片裁剪-->
+		<activity
+				android:name="com.yalantis.ucrop.UCropActivity"
+				android:screenOrientation="portrait" />
+
 		<provider
-				android:authorities="com.sonnyjack.album.provider"
-				android:name="androidx.core.content.FileProvider"
+				android:name="com.sonnyjack.album.provider.AlbumFileProvider"
+				android:authorities="com.sonnyjack.album.FileProvider"
 				android:exported="false"
 				android:grantUriPermissions="true">
 			<meta-data
 					android:name="android.support.FILE_PROVIDER_PATHS"
-					android:resource="@xml/file_path"/>
+					android:resource="@xml/album_file_path" />
 		</provider>
 	</application>
 
