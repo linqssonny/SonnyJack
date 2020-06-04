@@ -235,7 +235,7 @@ object AlbumImageUtils {
     fun imageUri2Path(context: Context, uri: Uri?): String? {
         if (null == uri) return null
         val filePathColumns = arrayOf(MediaStore.Images.Media.DATA)
-        val c = context.contentResolver.query(uri, filePathColumns, null, null, null)
+        val c = context.contentResolver.query(uri, filePathColumns, null, null, null)!!
         c.moveToFirst()
         val columnIndex = c.getColumnIndex(filePathColumns[0])
         val picturePath = c.getString(columnIndex)

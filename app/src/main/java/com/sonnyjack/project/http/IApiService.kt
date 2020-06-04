@@ -1,8 +1,7 @@
 package com.sonnyjack.project.http
 
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import retrofit2.http.GET
-import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface IApiService {

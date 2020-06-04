@@ -1,11 +1,9 @@
 package com.sonnyjack.project.http
 
-import com.sonnyjack.library.http.HttpManager
 import com.sonnyjack.library.mvp.BasePresenter
-import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.functions.Consumer
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class HttpPresenter : BasePresenter<HttpContract.HttpView, HttpContract.HttpModel> {
     constructor(view: HttpContract.HttpView) : super(view, HttpModel())
