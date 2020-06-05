@@ -3,6 +3,9 @@ ext {
     minSdkVersion = 21
     targetSdkVersion = 29
 
+    applicationId_release = "com.sonnyjack.project"
+    applicationId_beta = "com.sonnyjack.project_beta"
+
     libraryName = [
             constraintlayout: 'androidx.constraintlayout:constraintlayout',
             photoview       : 'com.github.chrisbanes:PhotoView',

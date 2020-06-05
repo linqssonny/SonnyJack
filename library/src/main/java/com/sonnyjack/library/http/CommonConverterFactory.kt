@@ -8,7 +8,7 @@ import java.lang.reflect.Type
 
 open class CommonConverterFactory : Converter.Factory {
 
-    private var gson: Gson = Gson()
+    val gson: Gson = Gson()
 
     constructor()
 

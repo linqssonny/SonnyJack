@@ -22,7 +22,6 @@ class SonnyJackApplication : BaseApplication() {
     }
 
     override fun getActivityLifecycleCallbacks(): BaseActivityLifecycleCallbacks {
-        //return super.getActivityLifecycleCallbacks()
         return SonnyJackActivityLifecycleCallbacks()
     }
 }

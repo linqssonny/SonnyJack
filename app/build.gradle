@@ -1,24 +1,113 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+
+def getAppVersionCode() {
+    1
+}
+
+def getAppVersionName() {
+    "1.0"
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.sonnyjack.project"
+        applicationId rootProject.applicationId_release
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode getAppVersionCode()
+        versionName getAppVersionName()
+        multiDexEnabled true
+        flavorDimensions "beta"
+
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a"
+        }
     }
+
+    productFlavors {
+        beta {
+            applicationId rootProject.applicationId_beta
+            resValue "string", "app_name", "SonnyJack开发版"
+            buildConfigField "boolean", "LOG", "true"//是否打印日志
+            buildConfigField "String", "API_DOMAIN", '"https://"'//接口域名
+            versionName getAppVersionName() + "_Beta"
+            manifestPlaceholders = [
+                    app_icon: "@mipmap/ic_launcher_round"
+            ]
+        }
+
+        pro {
+            applicationId rootProject.applicationId_release
+            resValue "string", "app_name", "SonnyJack"
+            buildConfigField "boolean", "LOG", "false"//是否打印日志
+            buildConfigField "String", "API_DOMAIN", '"http://"'//接口域名
+            versionName getAppVersionName() + "_Release"
+            manifestPlaceholders = [
+                    app_icon: "@mipmap/ic_launcher"
+            ]
+        }
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('SonnyJack.jks')
+            storePassword '123456'
+            keyAlias 'SonnyJack'
+            keyPassword '123456'
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources false //不打包没有使用资源
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled true
+            shrinkResources true //不打包没有使用资源
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs = listSubFile()
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "SonnyJack_${versionName}.apk"
+        }
+    }
+}
+
+//布局文件按模块分类
+def listSubFile() {
+    def resFolder = 'src/main/res/layout'
+    def files = file(resFolder).listFiles()
+    def folders = []
+    folders.add(file(resFolder).parentFile.absolutePath)
+    files.each { item ->
+        if (item.isDirectory()) {
+            folders.add(item.absolutePath)
+        }
+    }
+    return folders
 }
 
 dependencies {

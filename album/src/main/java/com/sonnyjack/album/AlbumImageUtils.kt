@@ -142,7 +142,9 @@ object AlbumImageUtils {
         fileUrl ?: null
         var imageFile = File(fileUrl!!)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {// sdk >= 24  android7.0以上
-            FileProvider.getUriForFile(context, "com.sonnyjack.album.FileProvider", imageFile)
+            //var s = "com.sonnyjack.album.FileProvider";
+            var fileProvider = context.packageName + ".FileProvider";
+            FileProvider.getUriForFile(context, fileProvider, imageFile)
         } else {
             Uri.fromFile(imageFile)//或者 Uri.isPaise("file://"+file.toString()
         }
