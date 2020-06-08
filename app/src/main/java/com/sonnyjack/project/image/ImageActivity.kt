@@ -30,7 +30,7 @@ class ImageActivity : BaseActivity<ImagePresenter>(), ImageContract.BaseImageVie
         findViewById<View>(R.id.tvImage).setOnClickListener {
             ImageManager.displayImage(
                 imageView,
-                "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1558542532701&di=305e1924992547f564cda24958871186&imgtype=0&src=http%3A%2F%2Fimg2.ph.126.net%2F8Y1u9aYRhqT4KHumTO_y1w%3D%3D%2F6619210632305894354.jpg"
+                "http://seopic.699pic.com/photo/50037/1038.jpg_wh1200.jpg"
             )
             //ImageManager.displayImage(imageView, "")
         }
@@ -43,7 +43,8 @@ class ImageActivity : BaseActivity<ImagePresenter>(), ImageContract.BaseImageVie
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == AlbumSelectionActivity.REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val parcelableArrayListExtra = data?.getParcelableArrayListExtra<ImageItem>(AlbumSelectionActivity.DATA)
+            val parcelableArrayListExtra =
+                data?.getParcelableArrayListExtra<ImageItem>(AlbumSelectionActivity.DATA)
             parcelableArrayListExtra?.run {
                 ImageManager.displayImage(imageView, get(0).path!!)
             }

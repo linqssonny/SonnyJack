@@ -7,7 +7,8 @@ import com.sonnyjack.library.mvp.BaseModel
 import com.sonnyjack.library.mvp.BasePresenter
 import com.sonnyjack.library.mvp.BaseView
 
-abstract class BaseActivity<P : BasePresenter<out BaseView, out BaseModel>> : AppCompatActivity(),
+abstract class BaseRxLifecycleActivity<P : BasePresenter<out BaseView, out BaseModel>> :
+    AppCompatActivity(),
     IActivityInterface<P> {
 
     private var activityDelegate: ActivityDelegate = ActivityDelegate(this)

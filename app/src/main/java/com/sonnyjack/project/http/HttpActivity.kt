@@ -1,6 +1,5 @@
 package com.sonnyjack.project.http
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.sonnyjack.library.base.BaseActivity
@@ -21,7 +20,7 @@ class HttpActivity : BaseActivity<HttpPresenter>(), HttpContract.HttpView {
         }
 
         findViewById<View>(R.id.btnGet).setOnClickListener {
-            mPresenter.requestData()
+            getPresenter().requestData()
         }
 
         findViewById<View>(R.id.btnDownload).setOnClickListener {

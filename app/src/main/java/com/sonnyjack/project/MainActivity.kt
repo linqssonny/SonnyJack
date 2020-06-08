@@ -21,7 +21,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainContract.BaseMainView {
         setContentView(R.layout.activity_main)
 
         findViewById<View>(R.id.tv).setOnClickListener {
-            mPresenter.requestData()
+            getPresenter().requestData()
         }
 
         findViewById<View>(R.id.btnHttp).setOnClickListener {
