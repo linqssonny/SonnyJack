@@ -1,7 +1,9 @@
 package com.libalum.album
 
+import android.R.id
 import android.content.Context
 import android.database.Cursor
+import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
 import com.sonnyjack.album.AlbumImageUtils
@@ -58,6 +60,7 @@ class LoadImageRunnable : Runnable {
         var videoFolder = ImageFolder()
         videoFolder.name = "视频"
 
+        val idIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns._ID)
         val pathIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA)
         val typeIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE)
         val durationIndex = cursor.getColumnIndex(MediaStore.Video.VideoColumns.DURATION)
@@ -70,6 +73,8 @@ class LoadImageRunnable : Runnable {
             if (!file.exists() || file.length() / 1000 <= 10) continue
             if (AlbumImageUtils.isWebp(imagePath)) continue
 
+            var uri: Uri
+
             var imageItem = ImageItem()
 
             imageItem.path = imagePath
@@ -77,11 +82,9 @@ class LoadImageRunnable : Runnable {
             imageItem.select = false
             //类型
             var type = cursor.getInt(typeIndex)
+            //id
+            var id = cursor.getInt(idIndex)
             imageItem.type = AlbumImageUtils.changeType(type)
-            //封面图  -->  全部
-            if (TextUtils.isEmpty(allImageFolder.firstImagePath)) {
-                allImageFolder.firstImagePath = imagePath
-            }
             if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 //如果是视频
                 var duration = cursor.getLong(durationIndex)//视频长度
@@ -90,6 +93,9 @@ class LoadImageRunnable : Runnable {
                 if (albumType == AlbumType.VIDEO || albumType == AlbumType.IMAGE_AND_VIDEO) {
                     allImageFolder.images.add(imageItem)
                 }
+                val baseUri = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                //val baseUri = Uri.parse("content://media/external/images/media")
+                uri = Uri.withAppendedPath(baseUri, "" + id)
             } else {
                 //图片类型
                 allImageFolder.images.add(imageItem)
@@ -108,17 +114,30 @@ class LoadImageRunnable : Runnable {
                     imageFolder.images.add(imageItem)
                     folderImageArray.add(imageFolder)
                 }
+                val baseUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                //val baseUri = Uri.parse("content://media/external/images/media")
+                uri = Uri.withAppendedPath(baseUri, "" + id)
+            }
+            imageItem.uri = uri
+            //封面图  -->  全部
+            if (TextUtils.isEmpty(allImageFolder.firstImagePath)) {
+                allImageFolder.firstImagePath = imagePath
+                allImageFolder.firstImageUri = uri
             }
         }
         cursor.close()
-        if (albumType == AlbumType.VIDEO) {//单纯视频
-            folderImageArray.clear()
-            folderImageArray.add(videoFolder)
-        } else if (albumType == AlbumType.IMAGE) {//单纯图片
-            folderImageArray.add(0, allImageFolder)
-        } else {//视频和图片
-            folderImageArray.add(0, videoFolder)
-            folderImageArray.add(0, allImageFolder)
+        when (albumType) {
+            AlbumType.VIDEO -> {//单纯视频
+                folderImageArray.clear()
+                folderImageArray.add(videoFolder)
+            }
+            AlbumType.IMAGE -> {//单纯图片
+                folderImageArray.add(0, allImageFolder)
+            }
+            else -> {//视频和图片
+                folderImageArray.add(0, videoFolder)
+                folderImageArray.add(0, allImageFolder)
+            }
         }
         callBackComplete(folderImageArray)
     }
@@ -144,7 +163,7 @@ class LoadImageRunnable : Runnable {
     }
 
     private fun buildImageCursor(): Cursor? {
-        val imageUri = MediaStore.Files.getContentUri("external")
+        val imageUri = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
         var projection = arrayOf(
             MediaStore.Files.FileColumns._ID,
             MediaStore.Files.FileColumns.DATA,

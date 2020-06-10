@@ -1,6 +1,7 @@
 package com.libalum.album
 
 import android.content.Context
+import android.os.Build
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -32,6 +33,7 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
 
     //所有的图片
     private var mImageFolders = ArrayList<ImageFolder>()
+
     //当前的相册位置
     private var mCurrentPosition = 0
 
@@ -96,7 +98,8 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        var view = LayoutInflater.from(parent.context).inflate(R.layout.album_recycler_item_image, parent, false)
+        var view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.album_recycler_item_image, parent, false)
         val layoutParams = RecyclerView.LayoutParams(mImageSize, mImageSize)
         view.layoutParams = layoutParams
         return ViewHolder(view)
@@ -152,11 +155,21 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
             imageView.scaleType = ImageView.ScaleType.CENTER
             imageView.setImageResource(R.drawable.album_take_photo)
             checkImage.visibility = View.GONE
-            imageView.setOnClickListener { mAlbumSelectionCallBack?.onClick(imageView, imageItem, null) }
+            imageView.setOnClickListener {
+                mAlbumSelectionCallBack?.onClick(
+                    imageView,
+                    imageItem,
+                    null
+                )
+            }
             return
         }
 
-        Glide.with(holder.getContext()).load(imageItem.path).into(imageView)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Glide.with(holder.getContext()).load(imageItem.uri).into(imageView)
+        } else {
+            Glide.with(holder.getContext()).load(imageItem.path).into(imageView)
+        }
         checkImage.isSelected = imageItem.select
         if (imageItem.type == AlbumType.VIDEO) {
             videoIcon.visibility = View.VISIBLE
@@ -212,7 +225,8 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
                     notifyItemChanged(position, REFRESH_SELECT)
                 }
             } else if (selectImagesSize >= mMaxImage) {
-                Toast.makeText(context, "最多可选择".plus(mMaxImage).plus("张图片"), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "最多可选择".plus(mMaxImage).plus("张图片"), Toast.LENGTH_LONG)
+                    .show()
                 return
             } else {
                 item.select = true
@@ -234,7 +248,8 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
             }
             (mContext as Activity).startActivityForResult(intent, ImageSDK.REQUEST_CODE_TAKE_VIDEO)*/
         } else {
-            Toast.makeText(context, "请选择小于" + mMaxVideoLength / 1000 + "s的视频", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "请选择小于" + mMaxVideoLength / 1000 + "s的视频", Toast.LENGTH_LONG)
+                .show()
         }
     }
 
@@ -281,7 +296,8 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
 
     fun getSelectItems(): ArrayList<ImageItem> {
         var selectImages = ArrayList<ImageItem>()
-        var allImageItemList = if (mImageFolders.size > 0) mImageFolders[0].images else ArrayList<ImageItem>()
+        var allImageItemList =
+            if (mImageFolders.size > 0) mImageFolders[0].images else ArrayList<ImageItem>()
         if (allImageItemList.size <= 0) return selectImages
         for (i in 0 until allImageItemList.size) {
             val item = allImageItemList[i]

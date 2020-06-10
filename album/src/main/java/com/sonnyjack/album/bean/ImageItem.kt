@@ -1,5 +1,6 @@
 package com.sonnyjack.album.bean
 
+import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 
@@ -9,10 +10,17 @@ class ImageItem() : Parcelable {
      * 文件路径
      */
     var path: String? = null
+
+    /**
+     * 文件uri
+     */
+    var uri: Uri? = null
+
     /**
      * 文件类型
      */
     var type: Int = 0
+
     /**
      * 时长(视频)
      */
@@ -21,16 +29,17 @@ class ImageItem() : Parcelable {
 
     var isEnable: Boolean = true//是否可以点击(用以只能选择图片或者视频)
 
-    constructor(path: String?): this(){
-        this.path = path
-    }
-
     constructor(parcel: Parcel) : this() {
         path = parcel.readString()
+        uri = parcel.readParcelable(Uri::class.java.classLoader)
         type = parcel.readInt()
         duration = parcel.readLong()
         select = parcel.readByte() != 0.toByte()
         isEnable = parcel.readByte() != 0.toByte()
+    }
+
+    constructor(path: String?) : this() {
+        this.path = path
     }
 
     fun getFormatDuration(): String {
@@ -47,6 +56,7 @@ class ImageItem() : Parcelable {
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(path)
+        parcel.writeParcelable(uri, flags)
         parcel.writeInt(type)
         parcel.writeLong(duration)
         parcel.writeByte(if (select) 1 else 0)
@@ -66,4 +76,5 @@ class ImageItem() : Parcelable {
             return arrayOfNulls(size)
         }
     }
+
 }
