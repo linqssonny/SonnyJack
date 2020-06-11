@@ -1,9 +1,12 @@
 package com.sonnyjack.album
 
+import android.content.Context
+import android.net.Uri
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
+import java.lang.Exception
 
 
 object ImageTypeUtils {
@@ -28,21 +31,36 @@ object ImageTypeUtils {
     /**
      * Return the type of image.
      *
-     * @param filePath The path of file.
+     * @param context
+     * @param imageUri the image uri
      * @return the type of image
      */
-    fun getImageType(filePath: String?): String {
-        return getImageType(getFileByPath(filePath))
+    fun getImageType(context: Context, imageUri: Uri?): String? {
+        var inputStream: InputStream? = null
+        return try {
+            inputStream = context.contentResolver.openInputStream(imageUri!!)
+            getImageType(inputStream)
+        } catch (e: Exception) {
+            null
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream!!.close()
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
     }
 
     /**
      * Return the type of image.
      *
-     * @param file The file.
+     * @param filePath The file path.
      * @return the type of image
      */
-    fun getImageType(file: File?): String {
-        if (file == null) return ""
+    fun getImageType(filePath: String?): String {
+        var file: File? = getFileByPath(filePath) ?: return ""
         var inputStream: InputStream? = null
         try {
             inputStream = FileInputStream(file)

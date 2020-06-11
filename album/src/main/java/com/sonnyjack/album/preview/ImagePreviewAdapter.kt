@@ -1,5 +1,6 @@
 package com.sonnyjack.album.preview
 
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
@@ -35,7 +36,12 @@ class ImagePreviewAdapter : PagerAdapter {
         var photoView = PhotoView(container.context)
         var item = getItem(position)
         item?.run {
-            Glide.with(container.context).load(item.path).into(photoView)
+            //Build.VERSION_CODES.Q
+            if (Build.VERSION.SDK_INT >= 29) {
+                Glide.with(container.context).load(item.uri).into(photoView)
+            } else {
+                Glide.with(container.context).load(item.path).into(photoView)
+            }
         }
         container.addView(photoView)
         return photoView

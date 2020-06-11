@@ -1,6 +1,5 @@
 package com.libalum.album
 
-import android.R.id
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
@@ -85,6 +84,7 @@ class LoadImageRunnable : Runnable {
             //id
             var id = cursor.getInt(idIndex)
             imageItem.type = AlbumImageUtils.changeType(type)
+            var baseUri: Uri
             if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                 //如果是视频
                 var duration = cursor.getLong(durationIndex)//视频长度
@@ -93,9 +93,8 @@ class LoadImageRunnable : Runnable {
                 if (albumType == AlbumType.VIDEO || albumType == AlbumType.IMAGE_AND_VIDEO) {
                     allImageFolder.images.add(imageItem)
                 }
-                val baseUri = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-                //val baseUri = Uri.parse("content://media/external/images/media")
-                uri = Uri.withAppendedPath(baseUri, "" + id)
+                baseUri = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                //val baseUri = Uri.parse("content://media/external/video/media")
             } else {
                 //图片类型
                 allImageFolder.images.add(imageItem)
@@ -114,10 +113,10 @@ class LoadImageRunnable : Runnable {
                     imageFolder.images.add(imageItem)
                     folderImageArray.add(imageFolder)
                 }
-                val baseUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                baseUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
                 //val baseUri = Uri.parse("content://media/external/images/media")
-                uri = Uri.withAppendedPath(baseUri, "" + id)
             }
+            uri = Uri.withAppendedPath(baseUri, "" + id)
             imageItem.uri = uri
             //封面图  -->  全部
             if (TextUtils.isEmpty(allImageFolder.firstImagePath)) {

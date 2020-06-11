@@ -45,8 +45,11 @@ class ImageActivity : BaseActivity<ImagePresenter>(), ImageContract.BaseImageVie
         if (requestCode == AlbumSelectionActivity.REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val parcelableArrayListExtra =
                 data?.getParcelableArrayListExtra<ImageItem>(AlbumSelectionActivity.DATA)
+            val dataType = data?.getIntExtra(AlbumSelectionActivity.DATA_TYPE, AlbumType.IMAGE)
             parcelableArrayListExtra?.run {
-                ImageManager.displayImage(imageView, get(0).path!!)
+                if (dataType == AlbumType.IMAGE) {
+                    ImageManager.displayImage(imageView, get(0).uri)
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ package com.sonnyjack.album
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -106,7 +107,7 @@ object AlbumImageUtils {
             })
     }
 
-    fun openCamera(activity: Activity, imageUrl: String?) {
+    fun openCamera(activity: Activity, imageUri: Uri) {
         var permission = ArrayList<String>()
         permission.add(Manifest.permission.CAMERA)
         permission.add(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -115,10 +116,7 @@ object AlbumImageUtils {
             .requestPermission(activity, permission, object : IRequestPermissionCallBack() {
                 override fun onGranted() {
                     val openCameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    openCameraIntent.putExtra(
-                        MediaStore.EXTRA_OUTPUT,
-                        fileUrlToUri(activity, imageUrl)
-                    )
+                    openCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
                     //Android7.0添加临时权限标记，此步千万别忘了
                     openCameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     activity.startActivityForResult(
@@ -133,9 +131,35 @@ object AlbumImageUtils {
             })
     }
 
+    /**
+     * 创建一个保存Image的Uri
+     */
+    fun buildImageOutputPathUri(context: Context): Uri? {
+        return if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
+            context.contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                ContentValues()
+            )
+        } else {
+            context.contentResolver.insert(
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI,
+                ContentValues()
+            )
+        }
+    }
+
+    /**
+     * 创建一个保存Image的Url
+     * Android Q 以后只能采用Uri形式
+     */
     fun buildImageOutputPathUrl(context: Context): String {
         var imageName = System.currentTimeMillis()
-        return getImagePath(context) + File.separator + imageName + ".png"
+        val imagePath = getImagePath(context) + File.separator + imageName + ".png"
+        var file = File(imagePath)
+        if (!file.exists()) {
+            file.createNewFile()
+        }
+        return imagePath
     }
 
     fun fileUrlToUri(context: Context, fileUrl: String?): Uri? {
@@ -149,17 +173,6 @@ object AlbumImageUtils {
             Uri.fromFile(imageFile)//或者 Uri.isPaise("file://"+file.toString()
         }
     }
-
-    /*fun urlToUri(context: Context, imagePath: String?): Uri? {
-        var imageFile = File(imagePath)
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {// sdk >= 24  android7.0以上
-            //与清单文件中android:authorities的值保持一致 File(imagePath))
-            FileProvider.getUriForFile(context, "com.sonnyjack.album.FileProvider", imageFile)
-            //FileProvider.getUriForFile(context, "com.sonnyjack.project" + ".provider", imageFile)
-        } else {
-            Uri.fromFile(imageFile)//或者 Uri.isPaise("file://"+file.toString()
-        }
-    }*/
 
     fun openPreviewImage(activity: Activity, selectItems: java.util.ArrayList<ImageItem>?) {
         var permission = ArrayList<String>()

@@ -164,8 +164,8 @@ class AlbumSelectionAdapter : RecyclerView.Adapter<ViewHolder> {
             }
             return
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        //Build.VERSION_CODES.Q
+        if (Build.VERSION.SDK_INT >= 29) {
             Glide.with(holder.getContext()).load(imageItem.uri).into(imageView)
         } else {
             Glide.with(holder.getContext()).load(imageItem.path).into(imageView)

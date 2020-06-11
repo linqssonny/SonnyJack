@@ -1,6 +1,7 @@
 package com.sonnyjack.library.image
 
 import android.content.Context
+import android.net.Uri
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
@@ -19,11 +20,27 @@ object ImageManager {
         return this.imageDisplayOption ?: ImageDisplayOption()
     }
 
+    fun displayImage(imageView: ImageView, imageUri: Uri?) {
+        displayImage(imageView.context, imageView, imageUri, null)
+    }
+
+    fun displayImage(
+        context: Context,
+        imageView: ImageView,
+        imageUri: Uri?
+    ) {
+        displayImage(context, imageView, imageUri, imageDisplayOption)
+    }
+
     fun displayImage(imageView: ImageView, imageUrl: String?) {
         displayImage(imageView.context, imageView, imageUrl)
     }
 
-    fun displayImage(imageView: ImageView, imageUrl: String?, imageDisplayOption: ImageDisplayOption?) {
+    fun displayImage(
+        imageView: ImageView,
+        imageUrl: String?,
+        imageDisplayOption: ImageDisplayOption?
+    ) {
         displayImage(imageView.context, imageView, imageUrl, imageDisplayOption)
     }
 
@@ -41,6 +58,16 @@ object ImageManager {
         Glide.with(context).load(imageUrl).apply(requestOptions).into(imageView)
     }
 
+    fun displayImage(
+        context: Context,
+        imageView: ImageView,
+        imageUri: Uri?,
+        imageDisplayOption: ImageDisplayOption?
+    ) {
+        var requestOptions = buildRequestOptions(imageDisplayOption)
+        Glide.with(context).load(imageUri).apply(requestOptions).into(imageView)
+    }
+
     private fun buildRequestOptions(imageDisplayOption: ImageDisplayOption?): RequestOptions {
         var displayOption: ImageDisplayOption? = imageDisplayOption ?: this.imageDisplayOption
         if (null == displayOption) {
@@ -55,7 +82,10 @@ object ImageManager {
             requestOptions.error(displayOption.getError())
         }
         if (displayOption.getOverrideWidth() > 0 || displayOption.getOverrideHeight() > 0) {
-            requestOptions.override(displayOption.getOverrideWidth(), displayOption.getOverrideHeight())
+            requestOptions.override(
+                displayOption.getOverrideWidth(),
+                displayOption.getOverrideHeight()
+            )
         }
         when (displayOption.getDecodeFormat()) {
             ImageDisplayOption.DECODE_FORMAT_RGB_565 -> requestOptions.format(DecodeFormat.PREFER_RGB_565)

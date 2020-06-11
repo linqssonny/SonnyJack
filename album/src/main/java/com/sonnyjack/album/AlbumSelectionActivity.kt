@@ -20,7 +20,6 @@ import com.sonnyjack.album.bean.AlbumType
 import com.sonnyjack.album.bean.ImageFolder
 import com.sonnyjack.album.bean.ImageItem
 import com.sonnyjack.album.preview.ImagePreviewActivity
-import java.io.File
 
 /**
  * 相册选择
@@ -60,7 +59,7 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
 
     private var mAlbumSelectionAdapter: AlbumSelectionAdapter? = null
 
-    private var mImageUrl: String? = null
+    private var mImageUri: Uri? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,8 +128,10 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
             AlbumSelectionAdapter.AlbumSelectionCallBack {
             override fun onClick(view: View, imageItem: ImageItem, obj: Any?) {
                 if (imageItem.type == AlbumType.TAKE_PHOTO) {//拍照
-                    mImageUrl = AlbumImageUtils.buildImageOutputPathUrl(this@AlbumSelectionActivity)
-                    AlbumImageUtils.openCamera(this@AlbumSelectionActivity, mImageUrl)
+                    mImageUri = AlbumImageUtils.buildImageOutputPathUri(this@AlbumSelectionActivity)
+                    mImageUri?.run {
+                        AlbumImageUtils.openCamera(this@AlbumSelectionActivity, this)
+                    }
                 }
             }
 
@@ -273,10 +274,13 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun cropImage(imagePath: String?) {
-        var imageUri = Uri.fromFile(File(imagePath))
-        mImageUrl = AlbumImageUtils.buildImageOutputPathUrl(this@AlbumSelectionActivity)
-        AlbumImageUtils.openCropImage(this, imageUri, Uri.parse(mImageUrl), REQUEST_CROP)
+    private fun cropImage(imageUri: Uri?) {
+        mImageUri = AlbumImageUtils.buildImageOutputPathUri(this@AlbumSelectionActivity)
+        AlbumImageUtils.openCropImage(this, imageUri, mImageUri, REQUEST_CROP)
+
+        /*var imageUrl = AlbumImageUtils.buildImageOutputPathUrl(this@AlbumSelectionActivity)
+        mImageUri = Uri.parse(imageUrl)
+        AlbumImageUtils.openCropImage(this, imageUri, mImageUri, REQUEST_CROP)*/
     }
 
     //确认返回
@@ -292,24 +296,26 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
         }
         //选中的是视频,目前没用，因为点击视频会直接跳到ShortVideoPreviewActivity，要在onActivityResult处理
         if (mAlbumSelectionAdapter!!.currentIsVideoMode()) {
-            videoComplete(selectItems[0].path)
+            videoComplete(selectItems[0])
             return
         }
         //是否裁剪
-        var firstImagePath = selectItems[0].path
-        var firstImageType = ImageTypeUtils.getImageType(firstImagePath)//第一张图片类型
+        var firstImageUri = selectItems[0].uri
+        var firstImageType = ImageTypeUtils.getImageType(this, firstImageUri)//第一张图片类型
         if (mIsNeedCrop && !"GIF".equals(firstImageType, ignoreCase = true)) {
-            cropImage(firstImagePath)
+            cropImage(firstImageUri)
             return
         }
         //选择图片完成
         imageComplete(selectItems)
     }
 
-    private fun videoComplete(videoPath: String?) {
+    private fun videoComplete(videoItem: ImageItem) {
         val intent = Intent()
-        //intent.putExtra(ImageSDK.KEY_VIDEO_PATH, videoPath)
-        //intent.putExtra(ImageSDK.KEY_RESULT_IS_VIDEO, true)
+        var resultArray = ArrayList<ImageItem>()
+        resultArray.add(videoItem)
+        intent.putParcelableArrayListExtra(DATA, resultArray)
+        intent.putExtra(DATA_TYPE, AlbumType.VIDEO)
         setResult(Activity.RESULT_OK, intent)
         finish()
     }
@@ -317,21 +323,22 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
     private fun imageComplete(selectItems: ArrayList<ImageItem>?) {
         val intent = Intent()
         intent.putParcelableArrayListExtra(DATA, selectItems)
-        intent.putExtra(DATA_TYPE, false)
+        intent.putExtra(DATA_TYPE, AlbumType.IMAGE)
         setResult(Activity.RESULT_OK, intent)
         finish()
     }
 
     //拍照完成后，处理
-    private fun takePhotoComplete(imagePath: String?) {
+    private fun takePhotoComplete(imageUri: Uri?) {
         var resultArray = ArrayList<ImageItem>()
-        imagePath?.run {
+        imageUri?.run {
             var imageItem = ImageItem()
-            imageItem.path = imagePath
+            imageItem.path = AlbumImageUtils.imageUri2Path(this@AlbumSelectionActivity, imageUri)
+            imageItem.uri = imageUri
             resultArray.add(imageItem)
         }
         if (mIsNeedCrop) {
-            cropImage(imagePath)
+            cropImage(imageUri)
         } else {
             imageComplete(resultArray)
         }
@@ -345,36 +352,18 @@ class AlbumSelectionActivity : AppCompatActivity(), View.OnClickListener {
                     imageComplete(data?.getParcelableArrayListExtra(DATA))
                 }
                 TAKE_PICTURE -> {//拍照
-                    takePhotoComplete(mImageUrl)
+                    takePhotoComplete(mImageUri)
                 }
                 REQUEST_CROP -> {//裁剪
                     var imageList = ArrayList<ImageItem>()
-                    imageList.add(ImageItem(mImageUrl))
+                    var imageItem = ImageItem()
+                    imageItem.uri = mImageUri
+                    imageItem.path = AlbumImageUtils.imageUri2Path(this, mImageUri)
+                    imageList.add(imageItem)
                     imageComplete(imageList)
                 }
             }
         }
-        /*if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                ImageSDK.REQUEST_CODE_TAKE_PICTURE ->//拍照回来
-                    data?.run {
-                        var imagePath = AlbumUtils.getImagePathByIntent(this@AlbumSelectionActivity, this)
-                        takePhotoComplete(imagePath)
-                    }
-                ImageSDK.REQUEST_CODE_TAKE_VIDEO ->//选择的是视频
-                    data?.run {
-                        videoComplete(getStringExtra(ShortVideoPreviewActivity.RESULT_EXTRA_VIDEO))
-                    }
-            }
-        }
-        //裁剪返回
-        if (requestCode == REQUEST_CROP_CODE && resultCode == NewCropActivity.RESULT_CROP) {
-            data?.run {
-                var resultArray = ArrayList<String>()
-                resultArray.add(getData().path)
-                imageComplete(resultArray)
-            }
-        }*/
     }
 
     /**

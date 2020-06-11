@@ -1,6 +1,8 @@
 package com.sonnyjack.album.bean
 
+import android.annotation.TargetApi
 import android.net.Uri
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 
@@ -9,6 +11,8 @@ class ImageItem() : Parcelable {
     /**
      * 文件路径
      */
+    @TargetApi(Build.VERSION_CODES.Q)
+    @Deprecated("Android Q will not support visit file path direct, please use field uri")
     var path: String? = null
 
     /**
