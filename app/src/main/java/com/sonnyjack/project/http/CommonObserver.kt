@@ -1,5 +1,6 @@
 package com.sonnyjack.project.http
 
+import com.sonnyjack.project.bean.Data
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 

@@ -50,4 +50,9 @@ class ActivityDelegate {
     fun getStatusConfig(): StatusBarConfig {
         return StatusBarConfig()
     }
+
+    fun createPresenter(clazz: Class<out BasePresenter<out BaseView, out BaseModel>>): Class<*> {
+        val newInstance = clazz.newInstance() as Class<*>
+        return newInstance
+    }
 }

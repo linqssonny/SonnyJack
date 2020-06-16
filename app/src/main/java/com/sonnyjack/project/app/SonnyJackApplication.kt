@@ -8,7 +8,13 @@ import com.sonnyjack.library.image.ImageManager
 import com.sonnyjack.project.R
 
 class SonnyJackApplication : BaseApplication() {
+
+    companion object {
+        lateinit var application: SonnyJackApplication
+    }
+
     override fun onCreate() {
+        application = this
         super.onCreate()
         var imageDisplayOption = ImageManager.createDefaultImageDisplayOption()
         imageDisplayOption.setPlaceholder(R.drawable.ic_launcher_background)
