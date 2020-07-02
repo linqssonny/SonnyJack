@@ -21,6 +21,7 @@ class HttpManager {
         return Interceptor {
             val originalResponse = it.proceed(it.request())
             val responseBody = ProgressResponseBody(
+                it.request(),
                 originalResponse.body(),
                 createResponseProgressListener(originalResponse.body())
             )
@@ -55,7 +56,7 @@ class HttpManager {
     ) {
         url ?: return
         progressResponseListener ?: return
-        urlCallBack.put(url, progressResponseListener)
+        urlCallBack[url] = progressResponseListener
     }
 
     private fun createRetrofit(baseUrl: String, isNew: Boolean = false): Retrofit {
